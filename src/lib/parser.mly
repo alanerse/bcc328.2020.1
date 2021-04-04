@@ -17,19 +17,27 @@
 %token                 LET
 %token                 IN
 
-%start <Absyn.lfundec> program
+%start <Absyn.lfundecs> program 
 
+%nonassoc IN ELSE
 %nonassoc LT
 %left PLUS
 
 %%
 
 program:
-| x=fundec EOF { x }
+| x=nonempty_list(fundec) EOF       { $loc , x }                              // regra 1 
+
+exps:
+| x=separated_nonempty_list(COMMA, exp) { x }    
 
 exp:
-| x=LITINT                { $loc , Absyn.IntExp x }
-| x=exp op=operator y=exp { $loc , Absyn.OpExp (op, x, y) }
+| x=LITINT                          { $loc , Absyn.IntExp x }
+| x=exp op=operator y=exp           { $loc , Absyn.OpExp (op, x, y) }
+| x=ID LPAREN y=exps RPAREN         { $loc , Absyn.FuncCallExp (x,y) } 
+| LET x=ID EQ y=exp IN z=exp        { $loc , Absyn.DecExp (x, y, z) }                 
+| IF x=exp THEN y=exp ELSE z=exp    { $loc , Absyn.CondExp (x, y, z) } 
+| x=ID                              { $loc , Absyn.IdExp x }  
 
 %inline operator:
 | PLUS { Absyn.Plus }
