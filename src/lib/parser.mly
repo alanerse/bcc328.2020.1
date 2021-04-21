@@ -32,12 +32,12 @@ exps:
 | x=separated_nonempty_list(COMMA, exp) { x }    
 
 exp:
+| x=ID                              { $loc , Absyn.IdExp x }
 | x=LITINT                          { $loc , Absyn.IntExp x }
 | x=exp op=operator y=exp           { $loc , Absyn.OpExp (op, x, y) }
 | x=ID LPAREN y=exps RPAREN         { $loc , Absyn.FuncCallExp (x,y) } 
 | LET x=ID EQ y=exp IN z=exp        { $loc , Absyn.DecExp (x, y, z) }                 
-| IF x=exp THEN y=exp ELSE z=exp    { $loc , Absyn.CondExp (x, y, z) } 
-| x=ID                              { $loc , Absyn.IdExp x }  
+| IF x=exp THEN y=exp ELSE z=exp    { $loc , Absyn.CondExp (x, y, z) }   
 
 %inline operator:
 | PLUS { Absyn.Plus }
